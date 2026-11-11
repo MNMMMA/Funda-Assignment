@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="compose.yaml" />
+  </Folder>
+  <Project Path="FundaAssignment.Console/FundaAssignment.Console.csproj" />
+  <Project Path="FundaAssignment.Core/FundaAssignment.Core.csproj" />
+  <Project Path="FundaAssignment.Infrastructure/FundaAssignment.Infrastructure.csproj" />
+  <Project Path="FundaAssignment.Tests/FundaAssignment.Tests.csproj" />
+</Solution>

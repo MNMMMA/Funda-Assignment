@@ -1,0 +1,7 @@
+﻿services:
+  fundaassignment.console:
+    image: fundaassignment.console
+    build:
+      context: .
+      dockerfile: FundaAssignment.Console/Dockerfile
+
