@@ -123,7 +123,7 @@ public class FundaApiClientTests
         using (Assert.EnterMultipleScope())
         {
             Assert.That(ex!.Page, Is.EqualTo(2));
-            Assert.That(ex.Message, Does.Contain("temporarily blocking"));
+            Assert.That(ex.Message, Does.Contain("HTML page instead of JSON"));
         }
     }
 

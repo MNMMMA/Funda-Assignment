@@ -25,8 +25,9 @@ public static class DependencyInjection
             .Validate(o => !string.IsNullOrWhiteSpace(o.ApiKey), "Funda:ApiKey is not configured.")
             .Validate(o => o.PageSize is > 0 and <= FundaApiOptions.MaxPageSize,
                 $"Funda:PageSize must be between 1 and {FundaApiOptions.MaxPageSize}.")
-            .Validate(o => o.RequestsPerMinute is > 0 and <= 90,
-                "Funda:RequestsPerMinute must be between 1 and 90.")
+            .Validate(o => o.RequestsPerMinute is > 0 and <= FundaApiOptions.MaxRequestsPerMinute,
+                $"Funda:RequestsPerMinute must be between 1 and {FundaApiOptions.MaxRequestsPerMinute}. " +
+                "Funda rejects more than 100 requests per minute, so the app stays safely below that limit.")
             .Validate(o => o.MaxRetryAttempts >= 0, "Funda:MaxRetryAttempts cannot be negative.")
             .Validate(o => o.RetryBaseDelaySeconds > 0, "Funda:RetryBaseDelaySeconds must be positive.")
             .Validate(o => o.BlockedRetryDelaySeconds > 0, "Funda:BlockedRetryDelaySeconds must be positive.")
