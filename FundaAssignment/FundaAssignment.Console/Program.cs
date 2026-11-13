@@ -6,6 +6,7 @@ using FundaAssignment.Infrastructure.Api;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
 {
@@ -27,11 +28,12 @@ Console.CancelKeyPress += (_, e) =>
     cts.Cancel();
 };
 
-var service = host.Services.GetRequiredService<TopAgentsService>();
-var writer = host.Services.GetRequiredService<IRankingWriter>();
-
 try
 {
+    // Resolving the services binds and validates the Funda options, so bad configuration fails here.
+    var service = host.Services.GetRequiredService<TopAgentsService>();
+    var writer = host.Services.GetRequiredService<IRankingWriter>();
+
     foreach (var report in Reports.All)
     {
         var rankings = await service.GetTopAgentsAsync(report.Search, count: 10, cts.Token);
@@ -39,6 +41,16 @@ try
     }
 
     return 0;
+}
+catch (OptionsValidationException ex)
+{
+    Console.Error.WriteLine("Invalid configuration:");
+    foreach (var failure in ex.Failures)
+    {
+        Console.Error.WriteLine($"  - {failure}");
+    }
+
+    return 3;
 }
 catch (OperationCanceledException)
 {

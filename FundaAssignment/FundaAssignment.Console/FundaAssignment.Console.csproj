@@ -5,15 +5,8 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-      <UserSecretsId>019df8a1-7596-453b-8294-c7e8816e6173</UserSecretsId>
-  </PropertyGroup>
-
-    <ItemGroup>
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
-    </ItemGroup>
+        <UserSecretsId>019df8a1-7596-453b-8294-c7e8816e6173</UserSecretsId>
+    </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\FundaAssignment.Core\FundaAssignment.Core.csproj" />
