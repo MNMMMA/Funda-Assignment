@@ -52,10 +52,17 @@ catch (OptionsValidationException ex)
 
     return 3;
 }
-catch (OperationCanceledException)
+catch (OperationCanceledException) when (cts.IsCancellationRequested)
 {
     Console.Error.WriteLine("Cancelled.");
     return 130;
+}
+catch (OperationCanceledException)
+{
+    // Not cancelled by the user, so the HttpClient timeout ran out.
+    Console.Error.WriteLine(
+        "The Funda API did not respond in time, even after retrying. Check your connection and try again.");
+    return 1;
 }
 catch (FundaApiBlockedException ex)
 {

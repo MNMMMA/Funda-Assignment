@@ -144,6 +144,18 @@ public class FundaApiClientTests
         }
     }
 
+    [TestCase("{ not valid json", "could not be read")]
+    [TestCase("null", "empty response")]
+    public void Throws_HttpRequestException_when_the_json_cannot_be_used(string body, string expectedMessage)
+    {
+        var handler = new FakeHttpMessageHandler(_ => FakeHttpMessageHandler.Json(body));
+
+        var ex = Assert.ThrowsAsync<HttpRequestException>(
+            async () => await CreateClient(handler).GetListingsAsync(Amsterdam).ToListAsync());
+
+        Assert.That(ex!.Message, Does.Contain(expectedMessage));
+    }
+
     [Test]
     public void Stops_when_cancelled()
     {

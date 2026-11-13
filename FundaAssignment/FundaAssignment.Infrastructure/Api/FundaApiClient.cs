@@ -88,8 +88,21 @@ public class FundaApiClient : IListingSource
                 statusCode: response.StatusCode);
         }
 
-        return JsonSerializer.Deserialize<FundaResponseDto>(body, JsonOptions)
-               ?? throw new InvalidOperationException($"The Funda API returned an empty response for page {page}.");
+        FundaResponseDto? result;
+        try
+        {
+            result = JsonSerializer.Deserialize<FundaResponseDto>(body, JsonOptions);
+        }
+        catch (JsonException ex)
+        {
+            throw new HttpRequestException(
+                $"Funda API page {page} returned JSON that could not be read: {ex.Message} " +
+                $"Body starts with: {Truncate(body)}",
+                ex);
+        }
+
+        return result
+               ?? throw new HttpRequestException($"Funda API page {page} returned an empty response.");
     }
     
     private static string Truncate(string value, int max = 200) =>

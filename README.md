@@ -76,7 +76,7 @@ The run took about [N] minutes for [N] requests in total.
 | Code | Meaning |
 |---|---|
 | 0 | Both reports were printed |
-| 1 | The API returned an HTTP error after all retries |
+| 1 | The API failed after all retries: an HTTP error, a timeout, or a response that could not be read |
 | 2 | Funda kept returning an HTML page instead of JSON (rate limit or invalid API key) |
 | 3 | Invalid configuration, such as a missing API key or `RequestsPerMinute` above 90 |
 | 130 | Cancelled with Ctrl+C |
