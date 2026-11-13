@@ -2,7 +2,7 @@
 using System.Text.Json;
 using FundaAssignment.Core.Interfaces;
 using FundaAssignment.Core.Models;
-using FundaAssignment.Infrastructure.API.Dtos;
+using FundaAssignment.Infrastructure.Api.Dtos;
 using FundaAssignment.Infrastructure.Http;
 using FundaAssignment.Infrastructure.Api.Mapping;
 using FundaAssignment.Infrastructure.Options;
@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 
 namespace FundaAssignment.Infrastructure.Api;
 
-public class FundaApiClient : IListingSource
+public sealed class FundaApiClient : IListingSource
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 

@@ -46,6 +46,19 @@ public class FundaApiOptionsValidationTests
         Assert.That(ex!.Failures, Has.One.Contains("ApiKey is not configured"));
     }
 
+    [TestCase("not a url")]
+    [TestCase("/feeds/Aanbod.svc/json/")]
+    [TestCase("ftp://funda.test/feeds/")]
+    public void Rejects_a_base_url_that_is_not_an_http_url(string baseUrl)
+    {
+        using var services = BuildServices(("Funda:BaseUrl", baseUrl));
+
+        var ex = Assert.Throws<OptionsValidationException>(
+            () => _ = services.GetRequiredService<IOptions<FundaApiOptions>>().Value);
+
+        Assert.That(ex!.Failures, Has.One.Contains("BaseUrl must be an absolute http or https URL"));
+    }
+
     private static ServiceProvider BuildServices(params (string Key, string Value)[] overrides)
     {
         var settings = new Dictionary<string, string?> { ["Funda:ApiKey"] = "test-key" };

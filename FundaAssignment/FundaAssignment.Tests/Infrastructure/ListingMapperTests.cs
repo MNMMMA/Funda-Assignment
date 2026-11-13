@@ -1,4 +1,4 @@
-using FundaAssignment.Infrastructure.API.Dtos;
+using FundaAssignment.Infrastructure.Api.Dtos;
 using FundaAssignment.Infrastructure.Api.Mapping;
 
 namespace FundaAssignment.Tests.Infrastructure;

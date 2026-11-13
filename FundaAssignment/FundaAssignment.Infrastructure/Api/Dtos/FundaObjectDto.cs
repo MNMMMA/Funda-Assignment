@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace FundaAssignment.Infrastructure.API.Dtos;
+namespace FundaAssignment.Infrastructure.Api.Dtos;
 
 internal sealed record FundaObjectDto
 {

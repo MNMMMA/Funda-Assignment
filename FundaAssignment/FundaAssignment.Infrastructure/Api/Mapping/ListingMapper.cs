@@ -1,5 +1,5 @@
 ﻿using FundaAssignment.Core.Models;
-using FundaAssignment.Infrastructure.API.Dtos;
+using FundaAssignment.Infrastructure.Api.Dtos;
 
 namespace FundaAssignment.Infrastructure.Api.Mapping;
 

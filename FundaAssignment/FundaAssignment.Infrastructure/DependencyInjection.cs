@@ -23,6 +23,9 @@ public static class DependencyInjection
         services.AddOptions<FundaApiOptions>()
             .Bind(section)
             .Validate(o => !string.IsNullOrWhiteSpace(o.ApiKey), "Funda:ApiKey is not configured.")
+            .Validate(o => Uri.TryCreate(o.BaseUrl, UriKind.Absolute, out var uri)
+                           && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp),
+                "Funda:BaseUrl must be an absolute http or https URL.")
             .Validate(o => o.PageSize is > 0 and <= FundaApiOptions.MaxPageSize,
                 $"Funda:PageSize must be between 1 and {FundaApiOptions.MaxPageSize}.")
             .Validate(o => o.RequestsPerMinute is > 0 and <= FundaApiOptions.MaxRequestsPerMinute,
@@ -60,7 +63,7 @@ public static class DependencyInjection
                 client.BaseAddress = new Uri($"{o.BaseUrl.TrimEnd('/')}/{o.ApiKey}/");
 
                 // The timeout covers the whole pipeline, including rate-limit waits and retry delays
-                // (block-page retries alone take 30+60+90+120s with the defaults).
+                // (retries after an HTML response alone take 30+60+90+120s with the defaults).
                 client.Timeout = TimeSpan.FromMinutes(10);
 
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("FundaAssignment/1.0");

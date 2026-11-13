@@ -15,7 +15,7 @@ internal static class FundaRetryPolicy
         OnRetry = args =>
         {
             var reason = args.Outcome.Result is { } r
-                ? IsBlockPage(r) ? "Funda returned its HTML block page" : $"HTTP {(int)r.StatusCode}"
+                ? IsBlockPage(r) ? "Funda returned an HTML page instead of JSON" : $"HTTP {(int)r.StatusCode}"
                 : args.Outcome.Exception?.Message ?? "unknown error";
 
             logger.LogWarning(
@@ -35,8 +35,8 @@ internal static class FundaRetryPolicy
     };
 
     /// <summary>
-    /// The Funda CDN (Akamai) answers 200 with a static HTML page instead of JSON
-    /// while it is blocking a client. The block lasts minutes, not seconds.
+    /// Funda sometimes answers 200 with an HTML page instead of JSON, for example when
+    /// requests are rejected for exceeding the rate limit or the API key is no longer accepted.
     /// </summary>
     public static bool IsBlockPage(HttpResponseMessage response) =>
         response.IsSuccessStatusCode && !IsJson(response);
@@ -59,8 +59,8 @@ internal static class FundaRetryPolicy
             }
         }
 
-        // Retrying a block page quickly only keeps the block alive, so back off much longer:
-        // with the defaults 30s, 60s, 90s, 120s.
+        // An HTML response usually means requests are being rejected, and retrying quickly
+        // only adds to the load, so back off much longer: with the defaults 30s, 60s, 90s, 120s.
         if (response is not null && IsBlockPage(response))
         {
             return TimeSpan.FromSeconds(options.BlockedRetryDelaySeconds * (attemptNumber + 1));
