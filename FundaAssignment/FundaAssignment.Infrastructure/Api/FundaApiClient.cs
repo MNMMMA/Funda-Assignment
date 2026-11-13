@@ -69,8 +69,7 @@ public class FundaApiClient : IListingSource
     private async Task<FundaResponseDto> FetchPageAsync(
         string searchQuery, int page, CancellationToken cancellationToken)
     {
-        var zo = Uri.EscapeDataString(searchQuery);
-        var relativeUrl = $"?type={_options.OfferType}&zo={zo}&page={page}&pagesize={_options.PageSize}";
+        var relativeUrl = $"?type={_options.OfferType}&zo={searchQuery}&page={page}&pagesize={_options.PageSize}";
 
         using var response = await _httpClient.GetAsync(relativeUrl, cancellationToken);
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -112,7 +111,7 @@ public class FundaApiClient : IListingSource
     {
         var segments = new List<string>
         {
-            Slugify(search.City)
+            Uri.EscapeDataString(Slugify(search.City))
         };
 
         if (search.RequiresGarden)

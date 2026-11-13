@@ -20,4 +20,9 @@
         <Using Include="NUnit.Framework"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\FundaAssignment.Core\FundaAssignment.Core.csproj" />
+        <ProjectReference Include="..\FundaAssignment.Infrastructure\FundaAssignment.Infrastructure.csproj" />
+    </ItemGroup>
+
 </Project>

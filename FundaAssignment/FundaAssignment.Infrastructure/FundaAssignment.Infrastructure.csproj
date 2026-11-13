@@ -7,6 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <InternalsVisibleTo Include="FundaAssignment.Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\FundaAssignment.Core\FundaAssignment.Core.csproj" />
     </ItemGroup>
 
