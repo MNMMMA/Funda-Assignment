@@ -13,15 +13,16 @@ public sealed class TopAgentsService
     }
     
     public async Task<IReadOnlyList<AgentRanking>> GetTopAgentsAsync(
-        string searchQuery,
+        ListingSearch search,
         int count = 10,
         CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(searchQuery);
+        ArgumentNullException.ThrowIfNull(search);
+        ArgumentException.ThrowIfNullOrWhiteSpace(search.City);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(count);
 
         var listings = await _listingSource
-            .GetListingsAsync(searchQuery, cancellationToken)
+            .GetListingsAsync(search, cancellationToken)
             .ToListAsync(cancellationToken);
 
         // Listings can shift between pages while paginating, so the same

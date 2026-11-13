@@ -5,6 +5,6 @@ namespace FundaAssignment.Core.Interfaces;
 public interface IListingSource
 {
     IAsyncEnumerable<Listing> GetListingsAsync(
-        string searchQuery,
+        ListingSearch search,
         CancellationToken cancellationToken = default);
 }
