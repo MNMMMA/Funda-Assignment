@@ -1,8 +1,9 @@
-﻿using System.Net.Http.Json;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Text.Json;
+using FundaAssignment.Core.Interfaces;
 using FundaAssignment.Core.Models;
 using FundaAssignment.Infrastructure.API.Dtos;
+using FundaAssignment.Infrastructure.Http;
 using FundaAssignment.Infrastructure.Api.Mapping;
 using FundaAssignment.Infrastructure.Options;
 using Microsoft.Extensions.Logging;
@@ -10,7 +11,7 @@ using Microsoft.Extensions.Options;
 
 namespace FundaAssignment.Infrastructure.Api;
 
-public class FundaApiClient
+public class FundaApiClient : IListingSource
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -29,9 +30,10 @@ public class FundaApiClient
     }
     
     public async IAsyncEnumerable<Listing> GetListingsAsync(
-        string searchQuery,
+        ListingSearch search,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        var searchQuery = ToSearchQuery(search);
         var page = 1;
         var totalPages = 1; // corrected after the first response
 
@@ -67,16 +69,32 @@ public class FundaApiClient
     private async Task<FundaResponseDto> FetchPageAsync(
         string searchQuery, int page, CancellationToken cancellationToken)
     {
-        // Keep the slashes readable: the API expects values like "/amsterdam/tuin/".
-        var zo = Uri.EscapeDataString(searchQuery).Replace("%2F", "/");
+        var zo = Uri.EscapeDataString(searchQuery);
         var relativeUrl = $"?type={_options.OfferType}&zo={zo}&page={page}&pagesize={_options.PageSize}";
 
-        var response = await _httpClient.GetFromJsonAsync<FundaResponseDto>(
-            relativeUrl, JsonOptions, cancellationToken);
+        using var response = await _httpClient.GetAsync(relativeUrl, cancellationToken);
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        return response ?? throw new InvalidOperationException(
-            $"The Funda API returned an empty response for page {page}.");
+        if (FundaRetryPolicy.IsBlockPage(response))
+        {
+            throw new FundaApiBlockedException(page, Truncate(body, 80));
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException(
+                $"Funda API page {page} failed after retries: HTTP {(int)response.StatusCode}, " +
+                $"content type '{response.Content.Headers.ContentType}'. Body starts with: {Truncate(body)}",
+                inner: null,
+                statusCode: response.StatusCode);
+        }
+
+        return JsonSerializer.Deserialize<FundaResponseDto>(body, JsonOptions)
+               ?? throw new InvalidOperationException($"The Funda API returned an empty response for page {page}.");
     }
+    
+    private static string Truncate(string value, int max = 200) =>
+        value.Length <= max ? value : value[..max] + "...";
     
     private static IEnumerable<FundaObjectDto> Flatten(FundaObjectDto parent)
     {
@@ -89,4 +107,22 @@ public class FundaApiClient
             }
         }
     }
+    
+    private static string ToSearchQuery(ListingSearch search)
+    {
+        var segments = new List<string>
+        {
+            Slugify(search.City)
+        };
+
+        if (search.RequiresGarden)
+        {
+            segments.Add("tuin");
+        }
+
+        return $"/{string.Join('/', segments)}/";
+    }
+
+    private static string Slugify(string value) =>
+        value.Trim().ToLowerInvariant().Replace(' ', '-');
 }
