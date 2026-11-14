@@ -2,11 +2,12 @@ using System.Net;
 using System.Net.Http.Headers;
 using FundaAssignment.Infrastructure.Http;
 using FundaAssignment.Infrastructure.Options;
+using FundaAssignment.Tests.Fakes;
 using Microsoft.Extensions.Logging.Abstractions;
 using Polly;
 using Polly.Retry;
 
-namespace FundaAssignment.Tests.Infrastructure;
+namespace FundaAssignment.Tests.Infrastructure.Http;
 
 [TestFixture]
 public class FundaRetryPolicyTests

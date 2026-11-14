@@ -3,7 +3,7 @@ using FundaAssignment.Core.Interfaces;
 using FundaAssignment.Core.Models;
 using FundaAssignment.Core.Services;
 
-namespace FundaAssignment.Tests.Core;
+namespace FundaAssignment.Tests.Core.Services;
 
 [TestFixture]
 public class TopAgentsServiceTests

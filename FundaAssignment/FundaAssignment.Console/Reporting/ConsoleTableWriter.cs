@@ -1,7 +1,7 @@
 ﻿using FundaAssignment.Core.Interfaces;
 using FundaAssignment.Core.Models;
 
-namespace FundaAssignment.Console;
+namespace FundaAssignment.Console.Reporting;
 
 public sealed class ConsoleTableWriter(TextWriter output) : IRankingWriter
 {

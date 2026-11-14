@@ -3,6 +3,7 @@ using System.Text.Json;
 using FundaAssignment.Core.Interfaces;
 using FundaAssignment.Core.Models;
 using FundaAssignment.Infrastructure.Api.Dtos;
+using FundaAssignment.Infrastructure.Api.Exceptions;
 using FundaAssignment.Infrastructure.Http;
 using FundaAssignment.Infrastructure.Api.Mapping;
 using FundaAssignment.Infrastructure.Options;

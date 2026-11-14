@@ -33,8 +33,7 @@ public static class DependencyInjection
                 "Funda rejects more than 100 requests per minute, so the app stays safely below that limit.")
             .Validate(o => o.MaxRetryAttempts >= 0, "Funda:MaxRetryAttempts cannot be negative.")
             .Validate(o => o.RetryBaseDelaySeconds > 0, "Funda:RetryBaseDelaySeconds must be positive.")
-            .Validate(o => o.BlockedRetryDelaySeconds > 0, "Funda:BlockedRetryDelaySeconds must be positive.")
-            .ValidateOnStart();
+            .Validate(o => o.BlockedRetryDelaySeconds > 0, "Funda:BlockedRetryDelaySeconds must be positive.");
 
         // One shared limiter for the whole process, so spacing holds across handler recycling.
         services.AddSingleton<RateLimiter>(sp =>

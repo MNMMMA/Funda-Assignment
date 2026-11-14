@@ -1,4 +1,4 @@
-namespace FundaAssignment.Infrastructure.Api;
+namespace FundaAssignment.Infrastructure.Api.Exceptions;
 
 /// <summary>
 /// Thrown when Funda keeps answering with an HTML page instead of JSON, even after all retries.

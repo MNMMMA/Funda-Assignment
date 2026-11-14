@@ -1,8 +1,8 @@
-﻿using FundaAssignment.Console;
+﻿using FundaAssignment.Console.Reporting;
 using FundaAssignment.Core.Interfaces;
 using FundaAssignment.Core.Services;
 using FundaAssignment.Infrastructure;
-using FundaAssignment.Infrastructure.Api;
+using FundaAssignment.Infrastructure.Api.Exceptions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

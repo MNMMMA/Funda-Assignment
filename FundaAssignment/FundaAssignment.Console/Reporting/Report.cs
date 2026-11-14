@@ -1,6 +1,6 @@
 ﻿using FundaAssignment.Core.Models;
 
-namespace FundaAssignment.Console.Models;
+namespace FundaAssignment.Console.Reporting;
 
 internal sealed record Report
 {

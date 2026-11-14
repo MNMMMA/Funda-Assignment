@@ -2,11 +2,13 @@ using System.Net;
 using System.Web;
 using FundaAssignment.Core.Models;
 using FundaAssignment.Infrastructure.Api;
+using FundaAssignment.Infrastructure.Api.Exceptions;
 using FundaAssignment.Infrastructure.Options;
+using FundaAssignment.Tests.Fakes;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
-namespace FundaAssignment.Tests.Infrastructure;
+namespace FundaAssignment.Tests.Infrastructure.Api;
 
 [TestFixture]
 public class FundaApiClientTests

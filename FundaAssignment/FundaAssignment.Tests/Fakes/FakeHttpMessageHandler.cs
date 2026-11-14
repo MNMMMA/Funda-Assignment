@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text;
 
-namespace FundaAssignment.Tests.Infrastructure;
+namespace FundaAssignment.Tests.Fakes;
 
 /// <summary>
 /// Answers requests from a callback and records every request URI, so tests never touch the real API.

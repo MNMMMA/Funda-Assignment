@@ -1,7 +1,7 @@
 using FundaAssignment.Infrastructure.Api.Dtos;
 using FundaAssignment.Infrastructure.Api.Mapping;
 
-namespace FundaAssignment.Tests.Infrastructure;
+namespace FundaAssignment.Tests.Infrastructure.Api.Mapping;
 
 [TestFixture]
 public class ListingMapperTests

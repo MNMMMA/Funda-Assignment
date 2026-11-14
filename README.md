@@ -35,10 +35,9 @@ A full run takes a few minutes. That is intentional; see [Rate limiting](#rate-l
 
 ### Sample output
 
-<!-- TODO: run the app once and replace both tables with the real output. Remove the log lines, keep only the tables. -->
-
 Output of a run on 13/11/2026:
 
+```
 Top 10 makelaars in Amsterdam
 =============================
 #  Agent                                    Id  Listings
@@ -68,6 +67,7 @@ Top 10 makelaars in Amsterdam with a garden (tuin)
 8  Linger OG Makelaars en Taxateurs     60557        14
 9  Eefje Voogd Makelaardij              24705        12
 10  Fransen & Kroes Makelaars Amsterdam  24819        10
+```
 
 The run took about [N] minutes for [N] requests in total.
 
@@ -94,7 +94,7 @@ Invalid configuration:
 |---|---|---|
 | `ApiKey` | (none) | Required. Set via user secrets or `Funda__ApiKey`. |
 | `PageSize` | 25 | Objects per page. The API does not return more than 25. |
-| `RequestsPerMinute` | 60 | Maximum request rate, 1""�90. The assignment states that more than 100 requests per minute are rejected, so higher values are refused at startup. |
+| `RequestsPerMinute` | 60 | Maximum request rate, 1–90. The assignment states that more than 100 requests per minute are rejected, so higher values are refused at startup. |
 | `MaxRetryAttempts` | 4 | Retries per request; 0 disables retrying. |
 | `RetryBaseDelaySeconds` | 5 | Base delay for the exponential backoff (5s, 10s, 20s, ...). |
 | `BlockedRetryDelaySeconds` | 30 | Base delay after an HTML response instead of JSON (30s, 60s, 90s, ...). |
@@ -103,15 +103,15 @@ Invalid configuration:
 
 ```
 FundaAssignment/
- FundaAssignment.Core            Domain models, interfaces and the ranking logic. No HTTP or JSON.
- FundaAssignment.Infrastructure  Funda API client, DTOs, mapping, rate limiting and retries.
- FundaAssignment.Console         Composition root: configuration, DI, the two reports and table output.
- FundaAssignment.Tests           NUnit tests for the ranking, mapping, API client and retry policy.
+├── FundaAssignment.Core            Domain models, interfaces and the ranking logic. No HTTP or JSON.
+├── FundaAssignment.Infrastructure  Funda API client, DTOs, mapping, rate limiting and retries.
+├── FundaAssignment.Console         Composition root: configuration, DI, the two reports and table output.
+└── FundaAssignment.Tests           NUnit tests for the ranking, mapping, API client and retry policy.
 ```
 
 The solution is split by concern: Core holds the business logic (ranking agents), Infrastructure talks to Funda, and Console handles configuration, input and output.
 
-Dependencies point inwards: Console "�� Infrastructure "�� Core. Core only knows the `IListingSource` interface, so the ranking logic can be tested without the API, and the data source could be swapped without touching it.
+Dependencies point inwards: Console → Infrastructure → Core. Core only knows the `IListingSource` interface, so the ranking logic can be tested without the API, and the data source could be swapped without touching it.
 
 ## Avoiding and handling API errors
 
