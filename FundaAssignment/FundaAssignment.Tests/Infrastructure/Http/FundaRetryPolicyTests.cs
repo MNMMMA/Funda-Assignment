@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using FundaAssignment.Infrastructure.Http;
 using FundaAssignment.Infrastructure.Options;
 using FundaAssignment.Tests.Fakes;
+using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging.Abstractions;
 using Polly;
 using Polly.Retry;
@@ -21,64 +22,38 @@ public class FundaRetryPolicyTests
 
     // --- Block page detection ---
 
-    [Test]
-    public void Html_with_status_200_is_a_block_page()
+    [TestCase(HttpStatusCode.OK, "text/html", true)]
+    [TestCase(HttpStatusCode.OK, "application/json", false)]
+    [TestCase(HttpStatusCode.OK, "text/json", false)]
+    [TestCase(HttpStatusCode.NotFound, "text/plain", false)]
+    public void Detects_an_html_response_instead_of_json(HttpStatusCode status, string mediaType, bool expected)
     {
-        var response = FakeHttpMessageHandler.BlockPage();
-
-        var isBlockPage = FundaRetryPolicy.IsBlockPage(response);
-
-        Assert.That(isBlockPage, Is.True);
-    }
-
-    [TestCase("application/json")]
-    [TestCase("text/json")]
-    public void Json_is_not_a_block_page(string mediaType)
-    {
-        var response = new HttpResponseMessage(HttpStatusCode.OK)
+        var response = new HttpResponseMessage(status)
         {
-            Content = new StringContent("{}", null, mediaType)
+            Content = new StringContent("body", null, mediaType)
         };
 
         var isBlockPage = FundaRetryPolicy.IsBlockPage(response);
 
-        Assert.That(isBlockPage, Is.False);
-    }
-
-    [Test]
-    public void An_error_status_is_not_a_block_page()
-    {
-        var response = FakeHttpMessageHandler.Status(HttpStatusCode.NotFound);
-
-        var isBlockPage = FundaRetryPolicy.IsBlockPage(response);
-
-        Assert.That(isBlockPage, Is.False);
+        Assert.That(isBlockPage, Is.EqualTo(expected));
     }
 
     // --- Which outcomes are retried ---
 
-    [TestCase(HttpStatusCode.RequestTimeout)]
-    [TestCase(HttpStatusCode.TooManyRequests)]
-    [TestCase(HttpStatusCode.InternalServerError)]
-    [TestCase(HttpStatusCode.ServiceUnavailable)]
-    public async Task Retries_transient_status_codes(HttpStatusCode statusCode)
+    // 408, 429 and 5xx can succeed on a later try; other 4xx errors fail the same way every time.
+    [TestCase(HttpStatusCode.RequestTimeout, true)]
+    [TestCase(HttpStatusCode.TooManyRequests, true)]
+    [TestCase(HttpStatusCode.InternalServerError, true)]
+    [TestCase(HttpStatusCode.ServiceUnavailable, true)]
+    [TestCase(HttpStatusCode.BadRequest, false)]
+    [TestCase(HttpStatusCode.NotFound, false)]
+    public async Task Retries_only_status_codes_that_can_succeed_later(HttpStatusCode status, bool expected)
     {
-        var outcome = Outcome.FromResult(FakeHttpMessageHandler.Status(statusCode));
+        var outcome = Outcome.FromResult(FakeHttpMessageHandler.Status(status));
 
         var shouldRetry = await ShouldRetry(outcome);
 
-        Assert.That(shouldRetry, Is.True);
-    }
-
-    [TestCase(HttpStatusCode.BadRequest)]
-    [TestCase(HttpStatusCode.NotFound)]
-    public async Task Does_not_retry_client_errors(HttpStatusCode statusCode)
-    {
-        var outcome = Outcome.FromResult(FakeHttpMessageHandler.Status(statusCode));
-
-        var shouldRetry = await ShouldRetry(outcome);
-
-        Assert.That(shouldRetry, Is.False);
+        Assert.That(shouldRetry, Is.EqualTo(expected));
     }
 
     [Test]
@@ -203,29 +178,23 @@ public class FundaRetryPolicyTests
         return new ResiliencePipelineBuilder<HttpResponseMessage>().AddRetry(strategy).Build();
     }
 
-    private static async Task<bool> ShouldRetry(Outcome<HttpResponseMessage> outcome)
-    {
-        var strategy = FundaRetryPolicy.Create(Options, NullLogger.Instance);
-        var context = ResilienceContextPool.Shared.Get();
-        try
-        {
-            return await strategy.ShouldHandle(
-                new RetryPredicateArguments<HttpResponseMessage>(context, outcome, attemptNumber: 0));
-        }
-        finally
-        {
-            ResilienceContextPool.Shared.Return(context);
-        }
-    }
+    private static Task<bool> ShouldRetry(Outcome<HttpResponseMessage> outcome) =>
+        CallPolicy((strategy, context) => strategy.ShouldHandle(
+            new RetryPredicateArguments<HttpResponseMessage>(context, outcome, attemptNumber: 0)));
 
-    private static async Task<TimeSpan?> GetDelay(Outcome<HttpResponseMessage> outcome, int attemptNumber)
+    private static Task<TimeSpan?> GetDelay(Outcome<HttpResponseMessage> outcome, int attemptNumber) =>
+        CallPolicy((strategy, context) => strategy.DelayGenerator!(
+            new RetryDelayGeneratorArguments<HttpResponseMessage>(context, outcome, attemptNumber)));
+
+    // Polly passes a context to every decision; borrow one from its pool and always return it.
+    private static async Task<T> CallPolicy<T>(
+        Func<HttpRetryStrategyOptions, ResilienceContext, ValueTask<T>> call)
     {
         var strategy = FundaRetryPolicy.Create(Options, NullLogger.Instance);
         var context = ResilienceContextPool.Shared.Get();
         try
         {
-            return await strategy.DelayGenerator!(
-                new RetryDelayGeneratorArguments<HttpResponseMessage>(context, outcome, attemptNumber));
+            return await call(strategy, context);
         }
         finally
         {

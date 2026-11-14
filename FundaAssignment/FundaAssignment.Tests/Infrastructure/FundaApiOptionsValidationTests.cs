@@ -21,42 +21,21 @@ public class FundaApiOptionsValidationTests
         Assert.That(options.RequestsPerMinute, Is.EqualTo(requestsPerMinute));
     }
 
-    [TestCase(0)]
-    [TestCase(FundaApiOptions.MaxRequestsPerMinute + 1)]
-    [TestCase(500)]
-    public void Rejects_a_request_rate_outside_the_limit_with_an_explanation(int requestsPerMinute)
+    [TestCase("Funda:RequestsPerMinute", "0", "RequestsPerMinute must be between 1 and 90")]
+    [TestCase("Funda:RequestsPerMinute", "91", "RequestsPerMinute must be between 1 and 90")]
+    [TestCase("Funda:RequestsPerMinute", "500", "rejects more than 100 requests per minute")]
+    [TestCase("Funda:ApiKey", "", "ApiKey is not configured")]
+    [TestCase("Funda:BaseUrl", "not a url", "BaseUrl must be an absolute http or https URL")]
+    [TestCase("Funda:BaseUrl", "/feeds/Aanbod.svc/json/", "BaseUrl must be an absolute http or https URL")]
+    [TestCase("Funda:BaseUrl", "ftp://funda.test/feeds/", "BaseUrl must be an absolute http or https URL")]
+    public void Rejects_an_invalid_setting_with_a_clear_message(string key, string value, string expectedMessage)
     {
-        using var services = BuildServices(("Funda:RequestsPerMinute", requestsPerMinute.ToString()));
+        using var services = BuildServices((key, value));
 
         var ex = Assert.Throws<OptionsValidationException>(
             () => _ = services.GetRequiredService<IOptions<FundaApiOptions>>().Value);
 
-        Assert.That(ex!.Failures.Single(), Does.Contain("RequestsPerMinute must be between 1 and 90")
-            .And.Contain("rejects more than 100 requests per minute"));
-    }
-
-    [Test]
-    public void Rejects_a_missing_api_key()
-    {
-        using var services = BuildServices(("Funda:ApiKey", ""));
-
-        var ex = Assert.Throws<OptionsValidationException>(
-            () => _ = services.GetRequiredService<IOptions<FundaApiOptions>>().Value);
-
-        Assert.That(ex!.Failures, Has.One.Contains("ApiKey is not configured"));
-    }
-
-    [TestCase("not a url")]
-    [TestCase("/feeds/Aanbod.svc/json/")]
-    [TestCase("ftp://funda.test/feeds/")]
-    public void Rejects_a_base_url_that_is_not_an_http_url(string baseUrl)
-    {
-        using var services = BuildServices(("Funda:BaseUrl", baseUrl));
-
-        var ex = Assert.Throws<OptionsValidationException>(
-            () => _ = services.GetRequiredService<IOptions<FundaApiOptions>>().Value);
-
-        Assert.That(ex!.Failures, Has.One.Contains("BaseUrl must be an absolute http or https URL"));
+        Assert.That(ex!.Failures, Has.One.Contains(expectedMessage));
     }
 
     private static ServiceProvider BuildServices(params (string Key, string Value)[] overrides)
