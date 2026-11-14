@@ -40,36 +40,34 @@ Output of a run on 13/11/2026:
 ```
 Top 10 makelaars in Amsterdam
 =============================
-#  Agent                                    Id  Listings
+ #  Agent                                    Id  Listings
 ---------------------------------------------------------
-1  Heeren Makelaars                      24648       201
-2  Eefje Voogd Makelaardij               24705       192
-3  Hallie & Van Klooster Makelaardij     24605       172
-4  Broersma Wonen                        24067       155
-5  Ramón Mossel Makelaardij o.g. B.V.    24592       129
-6  DSTRCT | Forbes Global Properties     24599       104
-7  KRK Makelaars Amsterdam               24607        78
-8  Makelaardij Van der Linden Amsterdam  24079        76
-9  VON POLL REAL ESTATE                  24789        71
+ 1  Heeren Makelaars                      24648       201
+ 2  Eefje Voogd Makelaardij               24705       192
+ 3  Hallie & Van Klooster Makelaardij     24605       172
+ 4  Broersma Wonen                        24067       155
+ 5  Ramón Mossel Makelaardij o.g. B.V.    24592       129
+ 6  DSTRCT | Forbes Global Properties     24599       104
+ 7  KRK Makelaars Amsterdam               24607        78
+ 8  Makelaardij Van der Linden Amsterdam  24079        76
+ 9  VON POLL REAL ESTATE                  24789        71
 10  Nieuw West Makelaardij B.V.           24614        70
 
 Top 10 makelaars in Amsterdam with a garden (tuin)
 ==================================================
-#  Agent                                   Id  Listings
+ #  Agent                                   Id  Listings
 --------------------------------------------------------
-1  Broersma Wonen                       24067        30
-2  Heeren Makelaars                     24648        20
-3  Hoekstra en Van Eck Amsterdam Noord  24594        20
-4  DSTRCT | Forbes Global Properties    24599        18
-5  Carla van den Brink B.V.             24065        17
-6  Hallie & Van Klooster Makelaardij    24605        15
-7  Makelaarsland                        12285        15
-8  Linger OG Makelaars en Taxateurs     60557        14
-9  Eefje Voogd Makelaardij              24705        12
+ 1  Broersma Wonen                       24067        30
+ 2  Heeren Makelaars                     24648        20
+ 3  Hoekstra en Van Eck Amsterdam Noord  24594        20
+ 4  DSTRCT | Forbes Global Properties    24599        18
+ 5  Carla van den Brink B.V.             24065        17
+ 6  Hallie & Van Klooster Makelaardij    24605        15
+ 7  Makelaarsland                        12285        15
+ 8  Linger OG Makelaars en Taxateurs     60557        14
+ 9  Eefje Voogd Makelaardij              24705        12
 10  Fransen & Kroes Makelaars Amsterdam  24819        10
 ```
-
-The run took about [N] minutes for [N] requests in total.
 
 ### Exit codes
 
@@ -172,6 +170,7 @@ The tests never call the real API. The API client is tested with a fake `HttpMes
 | `ListingMapper` | field mapping, trimming, placeholder for a missing agent name |
 | `FundaApiClient` | paging, empty results, child listings, query building and escaping, HTML responses and HTTP errors, cancellation |
 | `FundaRetryPolicy` | HTML response detection, which failures are retried, delays, `Retry-After`, recovery and giving up |
+| Configuration (`AddFundaApi`) | valid request rates accepted; invalid settings rejected with a clear message |
 
 ## How I approached it
 
