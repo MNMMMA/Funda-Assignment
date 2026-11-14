@@ -21,9 +21,9 @@ public class FundaApiClientTests
     {
         var handler = new FakeHttpMessageHandler(request => PageOf(request) switch
         {
-            1 => FakeHttpMessageHandler.Json(Page(1, totalPages: 3, Obj(1, 10, "Alpha"))),
-            2 => FakeHttpMessageHandler.Json(Page(2, totalPages: 3, Obj(2, 20, "Bravo"))),
-            3 => FakeHttpMessageHandler.Json(Page(3, totalPages: 3, Obj(3, 30, "Charlie"))),
+            1 => FakeHttpMessageHandler.Json(Page(totalPages: 3, Obj(1, 10, "Alpha"))),
+            2 => FakeHttpMessageHandler.Json(Page(totalPages: 3, Obj(2, 20, "Bravo"))),
+            3 => FakeHttpMessageHandler.Json(Page(totalPages: 3, Obj(3, 30, "Charlie"))),
             _ => throw new AssertionException("Requested a page beyond the last one.")
         });
 
@@ -39,7 +39,7 @@ public class FundaApiClientTests
     [Test]
     public async Task Returns_nothing_when_the_search_has_no_results()
     {
-        var handler = new FakeHttpMessageHandler(_ => FakeHttpMessageHandler.Json(Page(1, totalPages: 0)));
+        var handler = new FakeHttpMessageHandler(_ => FakeHttpMessageHandler.Json(Page(totalPages: 0)));
 
         var listings = await CreateClient(handler).GetListingsAsync(Amsterdam).ToListAsync();
 
@@ -58,7 +58,7 @@ public class FundaApiClientTests
             """{ "GlobalId": 1, "MakelaarId": 10, "MakelaarNaam": "Alpha", "ChildrenObjects": [""" +
             """  { "GlobalId": 2, "MakelaarId": 10, "MakelaarNaam": "Alpha", "ChildrenObjects": [""" +
             """    { "GlobalId": 3, "MakelaarId": 10, "MakelaarNaam": "Alpha" } ] } ] }""";
-        var handler = new FakeHttpMessageHandler(_ => FakeHttpMessageHandler.Json(Page(1, totalPages: 1, parent)));
+        var handler = new FakeHttpMessageHandler(_ => FakeHttpMessageHandler.Json(Page(totalPages: 1, parent)));
 
         var listings = await CreateClient(handler).GetListingsAsync(Amsterdam).ToListAsync();
 
@@ -70,7 +70,7 @@ public class FundaApiClientTests
     [TestCase("  Den Haag ", false, "/den-haag/")]
     public async Task Builds_the_search_query_from_the_search(string city, bool requiresGarden, string expectedZo)
     {
-        var handler = new FakeHttpMessageHandler(_ => FakeHttpMessageHandler.Json(Page(1, totalPages: 1)));
+        var handler = new FakeHttpMessageHandler(_ => FakeHttpMessageHandler.Json(Page(totalPages: 1)));
         var search = new ListingSearch { City = city, RequiresGarden = requiresGarden };
 
         await CreateClient(handler).GetListingsAsync(search).ToListAsync();
@@ -89,7 +89,7 @@ public class FundaApiClientTests
     [Test]
     public async Task Escapes_special_characters_in_the_city_so_they_cannot_break_the_query()
     {
-        var handler = new FakeHttpMessageHandler(_ => FakeHttpMessageHandler.Json(Page(1, totalPages: 1)));
+        var handler = new FakeHttpMessageHandler(_ => FakeHttpMessageHandler.Json(Page(totalPages: 1)));
         var search = new ListingSearch { City = "A&B?c=d" };
 
         await CreateClient(handler).GetListingsAsync(search).ToListAsync();
@@ -105,7 +105,7 @@ public class FundaApiClientTests
     [Test]
     public async Task Sends_requests_relative_to_the_base_address()
     {
-        var handler = new FakeHttpMessageHandler(_ => FakeHttpMessageHandler.Json(Page(1, totalPages: 1)));
+        var handler = new FakeHttpMessageHandler(_ => FakeHttpMessageHandler.Json(Page(totalPages: 1)));
 
         await CreateClient(handler).GetListingsAsync(Amsterdam).ToListAsync();
 
@@ -116,7 +116,7 @@ public class FundaApiClientTests
     public void Throws_FundaApiBlockedException_with_the_page_that_got_the_html_block_page()
     {
         var handler = new FakeHttpMessageHandler(request => PageOf(request) == 1
-            ? FakeHttpMessageHandler.Json(Page(1, totalPages: 2, Obj(1, 10, "Alpha")))
+            ? FakeHttpMessageHandler.Json(Page(totalPages: 2, Obj(1, 10, "Alpha")))
             : FakeHttpMessageHandler.BlockPage());
 
         var ex = Assert.ThrowsAsync<FundaApiBlockedException>(
@@ -162,7 +162,7 @@ public class FundaApiClientTests
     public void Stops_when_cancelled()
     {
         var handler = new FakeHttpMessageHandler(_ =>
-            FakeHttpMessageHandler.Json(Page(1, totalPages: 1, Obj(1, 10, "Alpha"))));
+            FakeHttpMessageHandler.Json(Page(totalPages: 1, Obj(1, 10, "Alpha"))));
         using var cts = new CancellationTokenSource();
         cts.Cancel();
 
@@ -183,11 +183,11 @@ public class FundaApiClientTests
     private static string Obj(long id, int agentId, string agentName) =>
         $$"""{ "GlobalId": {{id}}, "MakelaarId": {{agentId}}, "MakelaarNaam": "{{agentName}}" }""";
 
-    private static string Page(int page, int totalPages, params string[] objects) =>
+    private static string Page(int totalPages, params string[] objects) =>
         $$"""
           {
             "Objects": [{{string.Join(",", objects)}}],
-            "Paging": { "AantalPaginas": {{totalPages}}, "HuidigePagina": {{page}} },
+            "Paging": { "AantalPaginas": {{totalPages}} },
             "TotaalAantalObjecten": {{objects.Length}}
           }
           """;

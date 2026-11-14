@@ -86,13 +86,8 @@ internal static class FundaRetryPolicy
 
         var status = (int)response.StatusCode;
 
-        // Too many requests, request timeout, server errors.
-        if (status is 408 or 429 or >= 500)
-        {
-            return true;
-        }
-
-        return IsBlockPage(response);
+        // Too many requests, request timeout, server errors. Other 400 errors wouldn't recover
+        return status is 408 or 429 or >= 500 || IsBlockPage(response);
     }
 
     private static bool IsJson(HttpResponseMessage response) =>
